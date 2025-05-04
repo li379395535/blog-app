@@ -45,3 +45,9 @@ export async function signup(formData: FormData) {
   revalidatePath('/', 'layout')
   redirect('/')
 }
+
+export async function isLogin() {
+  const supabase = await createClient()
+  const { data: { session } } = await supabase.auth.getSession()
+  return session !== null
+}
