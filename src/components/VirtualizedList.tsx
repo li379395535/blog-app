@@ -1,16 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { List, Button } from 'antd';
 import VirtualList from 'rc-virtual-list';
-
-interface BlogPost {
-  id: string;
-  title: string;
-  author: string;
-  date: string;
-  tags: string[];
-}
+import { BlogCard, BlogPost } from './blog/BlogCard';
+import { useSize } from 'ahooks';
+import { nanoid } from 'nanoid';
 
 const ContainerHeight = 400;
 
@@ -19,6 +14,9 @@ export function VirtualizedList() {
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
+  const ref = useRef(null);
+
+  const size = useSize(document.querySelector('body'));
 
   const appendData = async () => {
     setLoading(true);
@@ -26,11 +24,14 @@ export function VirtualizedList() {
       // 这里模拟从API获取数据
       // TODO: 替换为实际的API调用
       const newData = Array.from({ length: 10 }, (_, index) => ({
-        id: `${page}-${index}`,
+        id: nanoid(),
         title: `博客标题 ${page}-${index}`,
+        summary: '这是一篇精彩的博客文章，包含了丰富的内容和见解...',
+        coverImage: index % 2 === 0 ? 'https://picsum.photos/800/400' : undefined,
         author: `作者 ${index}`,
         date: new Date().toLocaleDateString(),
-        tags: ['标签1', '标签2']
+        tags: ['React', 'Next.js', '前端开发'],
+        category: ['tech', 'life', 'review'][index % 3] as 'tech' | 'life' | 'review'
       }));
       
       setData(prev => [...prev, ...newData]);
@@ -58,45 +59,27 @@ export function VirtualizedList() {
   };
 
   return (
-    <List>
+    <div ref={ref}>
       <VirtualList
         data={data}
-        height={ContainerHeight}
+        height={size?.height ?? 0}
         itemHeight={47}
         itemKey="id"
         onScroll={onScroll}
       >
         {(item: BlogPost) => (
-          <List.Item key={item.id} className="hover:bg-gray-50 cursor-pointer p-4">
-            <div className="flex flex-col w-full">
-              <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium text-gray-900">{item.title}</h3>
-                <span className="text-sm text-gray-500">{item.date}</span>
-              </div>
-              <div className="flex justify-between items-center mt-2">
-                <div className="flex gap-2">
-                  {item.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600">{item.author}</span>
-              </div>
-            </div>
+          <List.Item key={item.id} className="p-4">
+            <BlogCard post={item} />
           </List.Item>
         )}
       </VirtualList>
       {hasMore && (
-        <div className="flex justify-center py-4">
+        <div className="flex justify-center py-4 hidden">
           <Button loading={loading} onClick={appendData}>
             加载更多
           </Button>
         </div>
       )}
-    </List>
+    </div>
   );
 }

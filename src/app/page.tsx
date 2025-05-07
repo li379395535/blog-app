@@ -3,9 +3,11 @@
 import { useEffect, useState } from 'react';
 import { Button } from 'antd';
 import { useRouter } from 'next/navigation';
-import { getCurrentUser, logout } from './actions';
+import { getCurrentUser } from './actions';
 import { VirtualizedList } from '@/components/VirtualizedList';
 import { User } from '@supabase/supabase-js';
+import { Navbar } from '@/components/ui/Navbar';
+import { Sidebar } from '@/components/ui/Sidebar';
 
 export default function Home() {
   const router = useRouter();
@@ -26,14 +28,6 @@ export default function Home() {
     fetchUser();
   }, []);
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
-
   const handleCreatePost = () => {
     router.push('/posts/create');
   };
@@ -43,33 +37,40 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
-      <header className="flex justify-between items-center mb-8 bg-white p-4 rounded-lg shadow-sm">
-        <div className="flex items-center gap-4">
-          <span className="text-lg font-medium">
-            {user ? user.email : 'Guest'}
-          </span>
-        </div>
-        <div className="flex gap-4">
-          {user && (
-            <Button
-              type="primary"
-              onClick={handleCreatePost}
-            >
-              新建博客
-            </Button>
-          )}
-          {user ? (
-            <Button onClick={handleLogout}>登出</Button>
-          ) : (
-            <Button onClick={() => router.push('/login')}>登录</Button>
-          )}
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar onSearch={(value) => console.log('搜索:', value)} />
 
-      <main className="bg-white rounded-lg shadow-sm p-4">
-        <VirtualizedList />
-      </main>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* 主内容区 */}
+          <main className="flex-1">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">最新文章</h1>
+                {user && (
+                  <Button
+                    type="primary"
+                    onClick={handleCreatePost}
+                  >
+                    新建博客
+                  </Button>
+                )}
+              </div>
+              <VirtualizedList />
+            </div>
+          </main>
+
+          {/* 侧边栏 */}
+          <aside className="w-full lg:w-80 flex-shrink-0">
+            <div className="sticky top-24">
+              <Sidebar
+                authorName={user?.email}
+                authorBio="热爱技术，热爱生活。分享技术见解和生活感悟。"
+              />
+            </div>
+          </aside>
+        </div>
+      </div>
     </div>
   );
 }
