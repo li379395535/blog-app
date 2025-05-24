@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from 'antd';
 import { login, signup, isLogin } from './actions';
 import { redirect } from 'next/navigation';
+import '@ant-design/v5-patch-for-react-19';
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);

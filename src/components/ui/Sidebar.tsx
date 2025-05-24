@@ -20,7 +20,6 @@ interface SidebarProps {
 
 export function Sidebar({
   authorName = '博主',
-  authorAvatar,
   authorBio = '热爱技术，热爱生活。分享技术见解和生活感悟。',
   popularTags = [
     { name: 'React', count: 12 },
@@ -39,12 +38,6 @@ export function Sidebar({
       {/* 作者简介卡片 */}
       <div className="bg-white p-6 rounded-lg shadow-sm">
         <div className="flex items-center space-x-4 mb-4">
-          <Avatar
-            size={64}
-            icon={<UserOutlined />}
-            src={authorAvatar}
-            className="border-2 border-gray-200"
-          />
           <div>
             <h3 className="text-lg font-medium text-gray-900">{authorName}</h3>
             <p className="text-sm text-gray-500 mt-1">{authorBio}</p>

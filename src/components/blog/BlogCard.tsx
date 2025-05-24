@@ -29,7 +29,7 @@ export function BlogCard({ post }: BlogCardProps) {
   const router = useRouter();
 
   const handleClick = () => {
-    router.push(`/posts/${post.id}`);
+    router.push(`/detail/${post.id}`);
   };
 
   return (

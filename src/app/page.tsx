@@ -1,16 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Button } from 'antd';
-import { useRouter } from 'next/navigation';
 import { getCurrentUser } from './actions';
 import { VirtualizedList } from '@/components/VirtualizedList';
 import { User } from '@supabase/supabase-js';
-import { Navbar } from '@/components/ui/Navbar';
 import { Sidebar } from '@/components/ui/Sidebar';
+import Link from 'next/link';
 
 export default function Home() {
-  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -28,17 +25,12 @@ export default function Home() {
     fetchUser();
   }, []);
 
-  const handleCreatePost = () => {
-    router.push('/posts/create');
-  };
-
   if (loading) {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar onSearch={(value) => console.log('搜索:', value)} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
@@ -48,12 +40,12 @@ export default function Home() {
               <div className="flex justify-between items-center mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">最新文章</h1>
                 {user && (
-                  <Button
-                    type="primary"
-                    onClick={handleCreatePost}
+                  <Link
+                    href="/create"
+                    className="text-sm text-blue-500 hover:text-blue-700"
                   >
                     新建博客
-                  </Button>
+                  </Link>
                 )}
               </div>
               <VirtualizedList />
