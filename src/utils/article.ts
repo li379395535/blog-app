@@ -1,5 +1,3 @@
-import { createClient } from './supabase/client';
-
 export function generateSlug(title: string): string {
   return title
     .toLowerCase()

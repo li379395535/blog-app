@@ -1,0 +1,1 @@
+export type LooseObject<T = unknown> = Record<string, T>;

@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Card, Tag } from 'antd';
+import { Card } from 'antd';
 import { useRouter } from 'next/navigation';
 
 export interface BlogPost {
@@ -19,11 +19,11 @@ interface BlogCardProps {
   post: BlogPost;
 }
 
-const categoryColors = {
-  tech: 'blue',
-  life: 'green',
-  review: 'purple',
-};
+// const categoryColors = {
+//   tech: 'blue',
+//   life: 'green',
+//   review: 'purple',
+// };
 
 export function BlogCard({ post }: BlogCardProps) {
   const router = useRouter();
@@ -55,19 +55,19 @@ export function BlogCard({ post }: BlogCardProps) {
           <h2 className="text-xl font-semibold text-gray-900 line-clamp-2">
             {post.title}
           </h2>
-          <Tag color={categoryColors[post.category]} className="ml-2 flex-shrink-0">
+          {/* <Tag color={categoryColors[post.category]} className="ml-2 flex-shrink-0">
             {post.category === 'tech' ? '技术' :
              post.category === 'life' ? '生活' : '书评'}
-          </Tag>
+          </Tag> */}
         </div>
 
         <p className="text-gray-600 line-clamp-2">{post.summary}</p>
 
-        <div className="flex flex-wrap gap-2">
+        {/* <div className="flex flex-wrap gap-2">
           {post.tags.map((tag) => (
             <Tag key={tag} className="text-sm">{tag}</Tag>
           ))}
-        </div>
+        </div> */}
 
         <div className="flex items-center justify-between text-sm text-gray-500 pt-2">
           <span>{post.author}</span>

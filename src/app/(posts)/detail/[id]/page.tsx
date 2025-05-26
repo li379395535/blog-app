@@ -1,52 +1,27 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
 import ReactMarkdown from 'react-markdown';
-import { Spin } from 'antd';
 
 interface Article {
+  id: string;
   title: string;
   content: string;
   created_at: string;
   author_id: string;
 }
 
-export default function ArticleDetail() {
-  const { id } = useParams();
-  const [article, setArticle] = useState<Article | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchArticle = async () => {
-      const supabase = createClient();
-      try {
-        const { data, error } = await supabase
-          .from('articles')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        if (error) throw error;
-        setArticle(data);
-      } catch (error) {
-        console.error('Error fetching article:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArticle();
-  }, [id]);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <Spin size="large" />
-      </div>
-    );
-  }
+export async function generateStaticParams() {
+  const posts: Article[] = await fetch(`http://localhost:3000/api/articles`).then((res) => res.json());
+  return posts.map((post) => ({
+    id: String(post.id),
+  }))
+}
+export const dynamicParams = true;
+export default async function ArticleDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params;
+  const article = await fetch(`/api/article?id=${id}`).then((res) => res.json());
 
   if (!article) {
     return (
