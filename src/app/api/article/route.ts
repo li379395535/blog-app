@@ -18,9 +18,7 @@ export async function GET(request: Request) {
       throw error;
     }
 
-    return NextResponse.json({
-      available: !data,
-    });
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Error getting an article:', error);
     return NextResponse.json(

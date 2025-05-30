@@ -7,6 +7,7 @@ import { Button, Input, message, Progress } from 'antd';
 import dynamic from 'next/dynamic';
 import { generateSlug, checkSlugAvailability, saveDraft, loadDraft, clearDraft } from '@/utils/article';
 import { debounce } from 'lodash';
+import { ArticleForm, save } from './actions';
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), {
   ssr: false,
@@ -16,7 +17,7 @@ const MAX_TITLE_LENGTH = 50;
 
 export default function CreateArticle() {
   const router = useRouter();
-  const [article, setArticle] = useState({
+  const [article, setArticle] = useState<ArticleForm>({
     title: '',
     content: '',
     slug: '',
@@ -80,20 +81,7 @@ export default function CreateArticle() {
         return;
       }
 
-      const { data, error } = await supabase
-        .from('articles')
-        .insert([
-          {
-            title: article.title,
-            content: article.content,
-            slug: article.slug || null,
-            author_id: userData.user.id,
-          },
-        ])
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await save(article, userData.user)
       clearDraft();
       message.success('创建成功');
       router.push(`/detail/${data.id}`);

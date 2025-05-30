@@ -1,10 +1,13 @@
 'use client'
 
-import { useState } from 'react';
-import { Input } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { useState, useEffect } from 'react';
+import { Input, Button, Dropdown } from 'antd';
+import { SearchOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
+import { User } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/utils/supabase/client';
+import { logout } from '@/app/actions';
 
 const { Search } = Input;
 
@@ -15,6 +18,27 @@ interface NavbarProps {
 export function Navbar({ onSearch }: NavbarProps) {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState('');
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    // 获取初始用户状态
+    const getUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    };
+    getUser();
+
+    // 监听认证状态变化
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const categories = [
     { key: 'tech', label: '技术' },
@@ -75,6 +99,42 @@ export function Navbar({ onSearch }: NavbarProps) {
               onSearch={handleSearch}
               className="w-full"
             />
+          </div>
+
+          {/* User Section */}
+          <div className="ml-4 relative">
+            {user ? (
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: 'logout',
+                      icon: <LogoutOutlined />,
+                      label: '登出',
+                      onClick: async () => {
+                        await logout();
+                        router.push('/');
+                      }
+                    }
+                  ]
+                }}
+                placement="bottomRight"
+                trigger={['hover']}
+              >
+                <span className="text-gray-600 hover:text-gray-900 text-sm cursor-pointer">
+                  {user.email}
+                </span>
+              </Dropdown>
+            ) : (
+              <Button
+                type="link"
+                icon={<UserOutlined />}
+                onClick={() => router.push('/login')}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                登录/注册
+              </Button>
+            )}
           </div>
         </div>
       </div>

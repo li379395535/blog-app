@@ -6,6 +6,7 @@ import { BlogCard, BlogPost } from '../blog/BlogCard';
 import { createClient } from '@/utils/supabase/client';
 import { uniqBy } from 'lodash';
 
+const PAGE_SIZE = 10; // 每页显示的数量
 
 export default function VirtualizedList() {
   const [data, setData] = useState<BlogPost[]>([]);
@@ -23,7 +24,7 @@ export default function VirtualizedList() {
       const { data: newData, error } = await supabase
         .from('articles')
         .select('*')
-        .range((page - 1) * 10, page * 10 - 1)
+        .range((page - 1) * PAGE_SIZE, page * PAGE_SIZE - 1)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -65,7 +66,7 @@ export default function VirtualizedList() {
   }, []);
 
   return (
-    <div ref={ref} className='h-full'>
+    <div ref={ref} className='flex flex-col gap-3'>
       {
         data.map(item => (
           <List.Item key={item.id}>

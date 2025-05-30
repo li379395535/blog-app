@@ -1,27 +1,21 @@
+import { Article } from '@/global';
 import ReactMarkdown from 'react-markdown';
 
-interface Article {
-  id: string;
-  title: string;
-  content: string;
-  created_at: string;
-  author_id: string;
-}
 
 export async function generateStaticParams() {
-  const posts: Article[] = await fetch(`http://localhost:3000/api/articles`).then((res) => res.json());
+  const posts: Article[] = await fetch(`http://localhost:3001/api/articles`).then((res) => res.json());
   return posts.map((post) => ({
     id: String(post.id),
   }))
 }
-export const dynamicParams = true;
+
 export default async function ArticleDetail({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
   const { id } = await params;
-  const article = await fetch(`/api/article?id=${id}`).then((res) => res.json());
+  const article = await fetch(`http://localhost:3001/api/article?id=${id}`, { next: { tags: ["articles"] } }).then((res) => res.json());
 
   if (!article) {
     return (
