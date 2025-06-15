@@ -2,7 +2,11 @@ import { Database } from '@/database.types'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function createClient() {
+export async function createClient({ disableCookie }: { disableCookie?: boolean } = {}) {
+
+  if (disableCookie) {
+    return createClientWithoutCookie()
+  }
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
@@ -23,6 +27,22 @@ export async function createClient() {
             // This can be ignored if you have middleware refreshing
             // user sessions.
           }
+        },
+      },
+    }
+  )
+}
+
+async function createClientWithoutCookie() {
+  return createServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return []
+        },
+        setAll() {
         },
       },
     }

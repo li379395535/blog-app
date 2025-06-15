@@ -53,7 +53,7 @@ export default function EditArticle() {
           return;
         }
 
-        setArticle(data);
+        setArticle(data as Article);
       } catch (error) {
         console.error('Error fetching article:', error);
         message.error('获取文章失败');
@@ -85,7 +85,7 @@ export default function EditArticle() {
       const { error } = await supabase
         .from('articles')
         .delete()
-        .eq('id', id);
+        .eq('id', Number(id));
 
       if (error) throw error;
       message.success('删除成功');
@@ -110,7 +110,7 @@ export default function EditArticle() {
           content: article.content,
           slug: article.slug,
         })
-        .eq('id', id);
+        .eq('id', Number(id));
 
       if (error) throw error;
       message.success('保存成功');

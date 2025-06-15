@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const { data, error } = await supabase
       .from('articles')
       .select('*')
-      .eq('id', id)
+      .eq('id', Number(id))
       .single();
 
     if (error && error.code !== 'PGRST116') {
