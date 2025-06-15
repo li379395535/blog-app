@@ -3,11 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { Button, Input, message, Progress } from 'antd';
+import { Button, Input, message, Progress, Select } from 'antd';
 import dynamic from 'next/dynamic';
 import { generateSlug, checkSlugAvailability, saveDraft, loadDraft, clearDraft } from '@/utils/article';
 import { debounce } from 'lodash';
-import { ArticleForm, save } from './actions';
+import { ArticleForm, getTags, save } from './actions';
+import useSWR from 'swr';
+import '@ant-design/v5-patch-for-react-19';
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), {
   ssr: false,
@@ -21,11 +23,13 @@ export default function CreateArticle() {
     title: '',
     content: '',
     slug: '',
+    tags: [],
   });
   const [saving, setSaving] = useState(false);
   const [slugAvailable, setSlugAvailable] = useState(true);
-  const [isSlugEdited, setIsSlugEdited] = useState(false);
   const [isDraftLoaded, setIsDraftLoaded] = useState(false);
+
+  const { data: tags = [], isLoading } = useSWR('tags', getTags);
 
   useEffect(() => {
     const draft = loadDraft();
@@ -47,18 +51,20 @@ export default function CreateArticle() {
   );
 
   useEffect(() => {
-    if (!isSlugEdited && article.title) {
+    if (article.title) {
       const newSlug = generateSlug(article.title);
       setArticle(prev => ({ ...prev, slug: newSlug }));
       checkSlug(newSlug);
     }
-  }, [article.title, isSlugEdited, checkSlug]);
+  }, [article.title, checkSlug]);
 
   useEffect(() => {
     if (article.title || article.content) {
       saveDraft(article);
     }
   }, [article]);
+
+
 
   const handleSave = async () => {
     if (!article.title || !article.content) {
@@ -68,6 +74,11 @@ export default function CreateArticle() {
 
     if (!slugAvailable) {
       message.error('当前URL别名已被占用，请修改');
+      return;
+    }
+
+    if (article.tags && article.tags.length > 5) {
+      message.error('标签最多选择5个');
       return;
     }
 
@@ -127,13 +138,30 @@ export default function CreateArticle() {
             value={article.slug}
             onChange={(e) => {
               setArticle({ ...article, slug: e.target.value });
-              setIsSlugEdited(true);
               checkSlug(e.target.value);
             }}
             status={!slugAvailable ? 'error' : ''}
           />
           {!slugAvailable && (
             <div className="text-red-500 text-sm mt-1">当前URL别名已被占用</div>
+          )}
+        </div>
+
+        <div>
+          <Select
+            mode="multiple"
+            style={{ width: '100%' }}
+            placeholder="选择标签（最多5个）"
+            value={article.tags}
+            onChange={(value) => setArticle({ ...article, tags: value })}
+            maxTagCount={5}
+            options={tags.map(tag => ({ label: tag.content, value: tag.content }))}
+            maxTagTextLength={10}
+            listHeight={200}
+            loading={isLoading}
+          />
+          {article.tags && article.tags.length > 5 && (
+            <div className="text-red-500 text-sm mt-1">标签最多选择5个</div>
           )}
         </div>
       </div>

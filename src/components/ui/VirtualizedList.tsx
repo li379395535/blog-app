@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { List, Spin } from 'antd';
+import { Spin } from 'antd';
 import { BlogCard, BlogPost } from '../blog/BlogCard';
 import { createClient } from '@/utils/supabase/client';
-import { uniqBy } from 'lodash';
+import { throttle, uniqBy } from 'lodash';
 
 const PAGE_SIZE = 10; // 每页显示的数量
 
@@ -17,10 +17,12 @@ export default function VirtualizedList() {
 
   // const size = useSize();
 
-  const appendData = async () => {
+  const appendData = throttle(async () => {
     setLoading(true);
     try {
       const supabase = createClient();
+
+      // 获取文章数据
       const { data: newData, error } = await supabase
         .from('articles')
         .select('*')
@@ -30,6 +32,7 @@ export default function VirtualizedList() {
       if (error) throw error;
 
       if (newData) {
+
         setData(prev => {
           return uniqBy(prev.concat(newData), 'id');
         });
@@ -45,7 +48,7 @@ export default function VirtualizedList() {
     } finally {
       setLoading(false);
     }
-  };
+  }, 1000);
 
   useEffect(() => {
     appendData();
@@ -69,13 +72,12 @@ export default function VirtualizedList() {
     <div ref={ref} className='flex flex-col gap-3'>
       {
         data.map(item => (
-          <List.Item key={item.id}>
-            <BlogCard post={item} />
-          </List.Item>))
+          <BlogCard post={item} key={item.id} />
+        ))
       }
 
       {loading && <div className='flex justify-center'><Spin spinning={loading} /></div>}
-      {!hasMore && <div className='flex justify-center'>没有更多数据了</div>}
+      {!loading && !hasMore && <div className='flex justify-center'>没有更多数据了</div>}
     </div>
   );
 }

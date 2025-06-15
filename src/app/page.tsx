@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import VirtualizedList from '@/components/ui/VirtualizedList';
-import { Sidebar } from '@/components/ui/Sidebar';
+import { Sidebar } from '@/components/blog/Sidebar';
 import Link from 'next/link';
 import { Skeleton } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
@@ -21,7 +21,7 @@ export default async function Home() {
                 <h1 className="text-2xl font-bold text-gray-900">最新文章</h1>
                 <Link
                   href={user ? "/create" : "/login"}
-                  className="text text-gray-500 hover:text-gray-700"
+                  className="text text-gray-500 hover:text-gray-700 hover:cursor"
                   >
                   <PlusOutlined />
                 </Link>
@@ -35,10 +35,7 @@ export default async function Home() {
           {/* 侧边栏 */}
           <aside className="w-full lg:w-80 flex-shrink-0">
             <div className="sticky top-24">
-              <Sidebar
-                authorName={'Welcome'}
-                authorBio="热爱技术，热爱生活。分享技术见解和生活感悟。"
-              />
+              <Sidebar className="space-y-6" />
             </div>
           </aside>
         </div>

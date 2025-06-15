@@ -1,7 +1,7 @@
-import { LooseObject } from '@/global'
+import { Database } from '@/database.types'
 import { createBrowserClient } from '@supabase/ssr'
-export function createClient<T extends LooseObject = LooseObject>() {
-  return createBrowserClient<T>(
+export function createClient() {
+  return createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
   )

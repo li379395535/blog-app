@@ -3,18 +3,21 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createClient } from '@/utils/supabase/client';
-import { Button, Input, message } from 'antd';
+import { Button, Input, message, Modal } from 'antd';
 import dynamic from 'next/dynamic';
+import { canManageArticle } from '@/utils/auth';
 
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), {
   ssr: false,
 });
 
 interface Article {
+  id: number;
   title: string;
   content: string;
   slug: string;
   author_id: string;
+  tags?: string[];
 }
 
 export default function EditArticle() {
@@ -37,11 +40,14 @@ export default function EditArticle() {
         const { data, error } = await supabase
           .from('articles')
           .select('*')
-          .eq('id', id)
+          .eq('id', Number(id))
           .single();
 
         if (error) throw error;
-        if (data.author_id !== userData.user.id) {
+
+        // 检查用户是否有权限编辑此文章
+        const hasPermission = await canManageArticle(data.author_id);
+        if (!hasPermission) {
           message.error('您没有权限编辑此文章');
           router.push('/');
           return;
@@ -58,6 +64,37 @@ export default function EditArticle() {
 
     fetchArticle();
   }, [id, router]);
+
+  const handleDelete = async () => {
+    const supabase = createClient();
+    try {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) {
+        router.push('/login');
+        return;
+      }
+
+      // 再次检查权限
+      if (!article) return;
+      const hasPermission = await canManageArticle(article.author_id);
+      if (!hasPermission) {
+        message.error('您没有权限删除此文章');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('articles')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      message.success('删除成功');
+      router.push('/');
+    } catch (error) {
+      console.error('Error deleting article:', error);
+      message.error('删除失败');
+    }
+  };
 
   const handleSave = async () => {
     if (!article) return;
@@ -129,6 +166,20 @@ export default function EditArticle() {
 
       <div className="mt-8 flex justify-end space-x-4">
         <Button onClick={() => router.back()}>取消</Button>
+        <Button
+          danger
+          onClick={() => {
+            Modal.confirm({
+              title: '确认删除',
+              content: '确定要删除这篇文章吗？此操作不可恢复',
+              okText: '确认',
+              cancelText: '取消',
+              onOk: handleDelete,
+            });
+          }}
+        >
+          删除
+        </Button>
         <Button
           type="primary"
           onClick={handleSave}
