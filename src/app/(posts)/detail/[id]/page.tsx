@@ -5,18 +5,14 @@ import { Tag as AntdTag } from 'antd';
 import { getCurrentUser } from '@/app/actions';
 import { canManageArticle } from '@/utils/auth';
 import { Suspense } from 'react';
-import { getArticle } from './actions';
-import { createClient } from '@/utils/supabase/server';
+import { getArticle, getCachedArticles } from './actions';
 
 export const revalidate = 60
 
 export async function generateStaticParams() {
   // 不再使用fetch API调用自己的接口
   // 而是直接使用Supabase客户端获取数据
-  const supabase = await createClient({ disableCookie: true });
-  const { data: posts } = await supabase
-    .from('articles')
-    .select('*');
+  const posts = await getCachedArticles();
 
   return (posts || []).map((post) => ({
     id: String(post.id),

@@ -1,4 +1,5 @@
 import { createClient } from '@/utils/supabase/server';
+import { unstable_cache } from 'next/cache';
 
 export async function getArticle(id: string) {
 
@@ -12,3 +13,11 @@ export async function getArticle(id: string) {
 
   return article;
 }
+
+export const getCachedArticles = unstable_cache(async () => {
+  const supabase = await createClient({ disableCookie: true });
+  const { data: articles } = await supabase
+    .from('articles')
+    .select('*');
+  return articles;
+}, ['articles'], { tags: ['articles'] })
