@@ -18,6 +18,7 @@ export default function VirtualizedList() {
   // const size = useSize();
 
   const appendData = throttle(async () => {
+    if (!hasMore) return;
     setLoading(true);
     try {
       const supabase = createClient();
