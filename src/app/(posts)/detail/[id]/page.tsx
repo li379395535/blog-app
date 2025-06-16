@@ -9,7 +9,7 @@ import { getArticle } from './actions';
 import { createClient } from '@/utils/supabase/server';
 
 export const revalidate = 60
-export const experimental_ppr = true
+
 export async function generateStaticParams() {
   // 不再使用fetch API调用自己的接口
   // 而是直接使用Supabase客户端获取数据
